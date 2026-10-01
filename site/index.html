@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<link rel="stylesheet" href="./style.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>故事列表 · oc-world</title>
+<link rel="stylesheet" href="./library.css">
+</head>
+<body>
+<div class="shell">
+  <header class="masthead">
+    <div><span class="eyebrow">OC WORLD · LOCAL LIBRARY</span><h1>你的故事</h1><p>选一个世界，写下这次的 IF，再看人物怎样走下去。</p></div>
+    <div class="head-actions"><span id="mode" class="mode">载入中…</span><button id="open-create" class="primary">＋ 创建故事</button></div>
+  </header>
+  <main>
+    <section id="notice" class="notice" hidden></section>
+    <section id="create-panel" class="panel" hidden>
+      <div class="panel-head"><div><span class="eyebrow">NEW STORY</span><h2>从世界开始</h2></div><button class="quiet" id="close-create">收起</button></div>
+      <div class="choice-grid">
+        <div class="choice"><h3>选现有世界</h3><p>同一个世界可以开启多份独立故事，每份都从初始状态开始。</p>
+          <label>世界<select id="world-select"></select></label>
+          <button id="edit-world" class="quiet" type="button" hidden>编辑这个世界</button>
+          <label>故事名称<input id="story-title" maxlength="80" placeholder="给这次故事取个名字"></label>
+          <button id="create-story" class="primary">创建并进入阅读</button>
+        </div>
+        <div class="choice"><h3>从资料导入世界</h3><p>支持 TXT、Markdown、项目 JSON 世界包及包含这些文件的 ZIP。</p>
+          <button id="open-import" class="secondary">选择资料并整理</button>
+          <p class="small">选择后先预览；自由文档只有点“分析资料”才调用 DeepSeek 并产生费用。JSON 包做本地校验。</p>
+        </div>
+      </div>
+    </section>
+    <section id="world-edit-panel" class="panel" hidden>
+      <div class="panel-head"><div><span class="eyebrow">EDIT WORLD</span><h2>编辑已导入世界</h2></div><button class="quiet" id="close-world-edit">收起</button></div>
+      <p>这里只改以后新建故事使用的世界版本；已存在的故事继续使用自己的快照。</p>
+      <div class="form-grid"><label>世界名称<input id="edit-title"></label><label>简介<input id="edit-summary"></label></div>
+      <label>世界设定<textarea id="edit-description" rows="4"></textarea></label>
+      <div id="edit-people"></div><div id="edit-places"></div>
+      <button id="save-world-edit" class="primary">保存新版本</button>
+    </section>
+    <section id="import-panel" class="panel" hidden>
+      <div class="panel-head"><div><span class="eyebrow">IMPORT WORLD</span><h2>整理资料</h2></div><button class="quiet" id="close-import">返回</button></div>
+      <p>选择单个文件或 ZIP。单次文件上限 1 MB；可读文字总量上限 48 KB，不会静默截断。ZIP 最多 24 项，其他格式会在结果里列出。</p>
+      <div class="upload-row"><input id="import-file" type="file" accept=".txt,.md,.markdown,.json,.zip"><button id="analyze" class="primary">分析资料</button></div>
+      <p id="import-status" class="small" aria-live="polite"></p>
+      <div id="preview" hidden>
+        <h3>整理预览</h3><p class="small" id="preview-files"></p><div id="evidence" class="evidence"></div>
+        <details class="source-details"><summary>查看字段与资料来源的对应关系</summary><div id="source-links"></div></details>
+        <div class="form-grid"><label>世界名称<input id="preview-title"></label><label>简介<input id="preview-summary"></label></div>
+        <label>世界设定<textarea id="preview-description" rows="4"></textarea></label>
+        <div id="preview-people"></div><div id="preview-places"></div>
+        <label>这份故事名称<input id="import-story-title" maxlength="80"></label>
+        <div class="button-row"><button id="save-import" class="primary">确认世界并创建故事</button><span class="small">保存后世界可重复使用；此故事保留独立快照。</span></div>
+      </div>
+    </section>
+    <section class="list-head"><div><span class="eyebrow">ARCHIVES</span><h2>继续阅读</h2></div><div class="list-controls"><span id="count"></span><button id="refresh-stories" class="quiet" type="button">刷新列表</button></div></section>
+    <div id="stories" class="stories"></div>
+    <section id="removed-section" class="removed-section" hidden><h2>最近移除</h2><p>移除只隐藏故事，存档仍保留。</p><div id="removed" class="stories"></div></section>
+  </main>
+  <footer><span>存档留在此设备 · 模型调用使用自己的 API</span><span>API 与存档可在页面上方打开</span></footer>
+</div>
+<script type="module">
+import { boot } from "./app.js";
+await boot();
+await import("./library.js");
+</script>
+</body></html>

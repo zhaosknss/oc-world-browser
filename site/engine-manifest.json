@@ -1,0 +1,133 @@
+{
+  "format": "oc-world-engine",
+  "version": 1,
+  "pyodide": "0.27.7",
+  "sha256": "5ab35c51fbb62d09ac25c86107b70249bba009d96d9a3a16dd4d214719b26ff0",
+  "files": [
+    {
+      "path": "src/__init__.py",
+      "sha256": "76bdfa65ffef85af7573ddf60fd4809ab223bb9171acb55b24e0d361b6adee94",
+      "bytes": 37
+    },
+    {
+      "path": "src/browser_lease.py",
+      "sha256": "1a3fd9d49dfbe74b92e7b08756f13017c32ba984535a4f1aa7b970a84854432b",
+      "bytes": 2449
+    },
+    {
+      "path": "src/browser_provider.py",
+      "sha256": "adab38a4f5599221472c1df180e1f202d9dd04e6c836fbb07f7a5e8b3dd6c4dd",
+      "bytes": 4850
+    },
+    {
+      "path": "src/browser_runtime.py",
+      "sha256": "3a0561dc7007cfd25141dc9d12723a51d9a07b67ef1fcc16f8b00df482ec5c14",
+      "bytes": 18411
+    },
+    {
+      "path": "src/chapter_protocol.py",
+      "sha256": "8ffeeb97a7c70ac4a0c3bb3a620ab3b26004ec28d804418451a0c5cc1cd500df",
+      "bytes": 14666
+    },
+    {
+      "path": "src/chapter_store.py",
+      "sha256": "cd2658a6a6fa71b5654300e3d9d1dcc1262f88053b6675c33cab5b0f573262cd",
+      "bytes": 10777
+    },
+    {
+      "path": "src/chapter_view.py",
+      "sha256": "c35d03c98c2ce7e5026a117bcb27e5682424d6308293a4b1bd92081d27d7dfa7",
+      "bytes": 3887
+    },
+    {
+      "path": "src/chapters.py",
+      "sha256": "df4351b50ab6f10692a3bc25fd09fe260da33fcbccde7ad1da82a4efc1dda030",
+      "bytes": 30695
+    },
+    {
+      "path": "src/context.py",
+      "sha256": "e4790e75ac57379da41cf69cfac33675e2031ab02708fd5124d2450fd67e492b",
+      "bytes": 18449
+    },
+    {
+      "path": "src/db.py",
+      "sha256": "6de26b28efef7809f5d8696c0898fe37d0324c22b4f283960a7af1fc1a862d65",
+      "bytes": 3930
+    },
+    {
+      "path": "src/deepseek.py",
+      "sha256": "a25e69f5b24a917b557fe3ab728d26ae4eebdd2b9070fbb1000223769f211287",
+      "bytes": 69957
+    },
+    {
+      "path": "src/demo.py",
+      "sha256": "10cd01a62c2f9775fa1692e7152866c39103d112887113cb844d976709a7517d",
+      "bytes": 37161
+    },
+    {
+      "path": "src/engine.py",
+      "sha256": "6f091b111a227abb8b9965e5ffff940763fbf431bc804b0eac4605f5772f371a",
+      "bytes": 55527
+    },
+    {
+      "path": "src/intervention.py",
+      "sha256": "4e50242d3407fff1e137521b8a96b8d756415e9fd1e922255363be9e02e02161",
+      "bytes": 13194
+    },
+    {
+      "path": "src/lease.py",
+      "sha256": "2580208cc8a9d78746d885c4da59d2b061871ec34258b7a3a19123f359edcede",
+      "bytes": 7353
+    },
+    {
+      "path": "src/library.py",
+      "sha256": "270c9356b5a2895e012034b13b6eb0531d99fbd40afc1e66d1e80ce5e78354d6",
+      "bytes": 30966
+    },
+    {
+      "path": "src/models.py",
+      "sha256": "3c092be730dd364d726626bda3403d66086b6eadf60aaba952c65359d1487c83",
+      "bytes": 20650
+    },
+    {
+      "path": "src/narrate.py",
+      "sha256": "c6ed81011828ca2950ad6932718e008e4f37bc58b172a81adf00685576ad271b",
+      "bytes": 45323
+    },
+    {
+      "path": "src/notes.py",
+      "sha256": "957cdbce49038b87c170713bf68199bf1067da8f96e38864724365c5b599fe80",
+      "bytes": 6734
+    },
+    {
+      "path": "src/provider.py",
+      "sha256": "0c2181c71a70b710a2061b58a705d27d65fd7b486804306ec7d7cdef99fa2e75",
+      "bytes": 20360
+    },
+    {
+      "path": "src/scenario.py",
+      "sha256": "1ba80fa66d31c9e2e3e37d3807d439f5a8340cffde039edbf0c926559ff06742",
+      "bytes": 11145
+    },
+    {
+      "path": "src/settlement.py",
+      "sha256": "77e602d511de0ed61e81f9191004393a18cc4c6985a445a4801ca870c3d4c0f2",
+      "bytes": 19812
+    },
+    {
+      "path": "src/story.py",
+      "sha256": "6034edb22a68e2406b9cec9ca5da69c68cd32d873e6a68042c95e3a6bcdfce94",
+      "bytes": 20050
+    },
+    {
+      "path": "src/schema.sql",
+      "sha256": "65d28fcc613eea29a59976e7ce2eb4ce745a0d50cbc2980c5b0b6b78266a9657",
+      "bytes": 8973
+    },
+    {
+      "path": "scenarios/browser-sample.json",
+      "sha256": "1265a879b971902558763133e9665665e768cfb4af4ed86a1362fb924d8ef7e1",
+      "bytes": 3960
+    }
+  ]
+}

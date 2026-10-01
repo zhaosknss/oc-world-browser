@@ -1,0 +1,208 @@
+/* Browser tools belong to the existing reading room: quiet utility, clear storage state. */
+:root{--local-ink:#263025;--local-accent:#286b42;--local-line:#d8ddd3;--local-paper:#fff}
+.local-tools-button{white-space:nowrap;font:inherit;font-size:13px;padding:8px 12px;border:1px solid var(--local-line);border-radius:9px;background:#fff;color:var(--local-ink);cursor:pointer}
+.local-tools-button:focus-visible,.local-dialog button:focus-visible,.local-dialog input:focus-visible,.local-dialog select:focus-visible{outline:3px solid #87b99a;outline-offset:3px}
+.local-dialog{width:min(540px,calc(100vw - 28px));max-height:90dvh;padding:25px;border:1px solid var(--local-line);border-radius:18px;background:var(--local-paper);color:var(--local-ink);box-shadow:0 20px 80px #17221b30;overflow:auto;font-family:ui-sans-serif,"Microsoft YaHei","PingFang SC",sans-serif}
+.local-dialog::backdrop{background:#17221b65}.local-dialog h2{font-size:23px;margin:0}.local-dialog h3{font-size:17px;margin:20px 0 6px}.local-dialog p{line-height:1.65;margin:10px 0;color:#596459;font-size:13px}.local-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:16px}.local-dialog label{display:block;font-size:13px;margin:13px 0;color:#46584a;font-weight:600}.local-dialog input,.local-dialog select{width:100%;padding:10px;border:1px solid #c9d5c9;border-radius:8px;margin-top:6px;font:inherit;font-weight:400;background:#fff;color:var(--local-ink)}
+.local-dialog button{font:inherit;font-size:13px;padding:9px 13px;border:1px solid var(--local-line);border-radius:9px;background:#f0f4ef;color:#315c3c;cursor:pointer}.local-dialog button.primary{background:var(--local-accent);color:#fff}.local-dialog button:disabled{opacity:.55;cursor:wait}.local-dialog-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:14px 0}.local-backup-section{border-top:1px solid var(--local-line);margin-top:22px;padding-top:3px}.local-note{padding:9px 12px;border-radius:8px;background:#edf4ec;font-size:13px;line-height:1.6;white-space:pre-wrap}.local-note.error{background:#fff1ed;color:#873e35}.local-status{color:#5c6d5d;font-size:12px;line-height:1.5}.local-loading{position:fixed;inset:0;z-index:900;display:grid;place-items:center;background:#f4f3ee}.local-loading-card{max-width:460px;margin:24px;padding:28px}.local-loading-card h2{font-size:25px;letter-spacing:-.03em;margin:0 0 14px}.local-loading-card p{font-size:14px;color:#596459;line-height:1.7}.local-progress{display:block;font-size:12px;color:#526d58;min-height:1.5em;margin-top:12px}.local-loading button{font:inherit;padding:10px 16px;border:1px solid var(--local-line);border-radius:9px;background:#fff;cursor:pointer}.local-saved-badge{font-size:11px;color:#667369;white-space:nowrap}
+@media(max-width:620px){.top-actions{gap:5px!important;flex-wrap:wrap}.local-tools-button{padding:7px 9px;font-size:12px}.local-dialog{padding:20px}.local-saved-badge{display:none}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* Mobile overrides are scoped to the browser build. The desktop web assets
+   retain their original body/stage scrolling behavior and are not changed. */
+.app .top {
+  padding-top: max(6px, env(safe-area-inset-top, 0px));
+  padding-left: max(12px, env(safe-area-inset-left, 0px));
+  padding-right: max(12px, env(safe-area-inset-right, 0px));
+}
+.app .bottom {
+  padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(12px, env(safe-area-inset-left, 0px));
+  padding-right: max(12px, env(safe-area-inset-right, 0px));
+}
+dialog.local-dialog {
+  max-height: min(90dvh, calc(100dvh - 24px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)));
+  overscroll-behavior: contain;
+  scroll-padding-block: 20px;
+  overflow-wrap: anywhere;
+}
+.local-loading .local-loading-card { max-width: min(460px, calc(100vw - 32px)); }
+
+@media (max-width: 620px) {
+  body:has(> .app) { height: 100dvh; overflow: hidden; }
+  body .app { width: 100%; height: 100dvh; min-height: 0; }
+  body input, body select, body textarea,
+  .app .if-box textarea, .app .intervene textarea,
+  dialog.local-dialog input, dialog.local-dialog select {
+    font-size: 16px;
+  }
+  .app button, .app a.ghost, .app .back-link,
+  .shell button, dialog.local-dialog button,
+  .local-loading button {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
+  .app .top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    gap: 0;
+    padding: max(4px, env(safe-area-inset-top, 0px))
+             max(10px, env(safe-area-inset-right, 0px))
+             6px max(10px, env(safe-area-inset-left, 0px));
+  }
+  .app .titles { width: 100%; min-width: 0; gap: 8px; align-items: center; }
+  .app .titles h1 { flex: 1 1 auto; min-width: 0; font-size: 15px; }
+  .app .back-link { display: inline-flex; align-items: center; margin: 0; font-size: 13px; }
+  .app .top-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    width: 100%;
+    min-width: 0;
+    gap: 4px !important;
+    align-items: center;
+  }
+  .app .top-actions .badge {
+    min-width: 0;
+    max-width: 100%;
+    padding: 3px 5px;
+    font-size: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .app .top-actions button.ghost,
+  .app .top-actions .local-tools-button { font-size: 12px; padding: 8px 7px; }
+  .app .top-actions .more { min-width: 0; }
+  .app .top-actions .local-saved-badge,
+  .shell .head-actions .local-saved-badge { display: none; }
+  .app .menu {
+    max-width: min(320px, calc(100vw - 24px));
+    max-height: 60dvh;
+    padding: 8px;
+    overscroll-behavior: contain;
+  }
+  .app .menu .menu-item { min-height: 44px; padding: 10px; overflow-wrap: anywhere; }
+  .app .stage {
+    min-width: 0;
+    min-height: 0;
+    overflow-x: hidden;
+    padding: 0 max(16px, env(safe-area-inset-right, 0px))
+             20px max(16px, env(safe-area-inset-left, 0px));
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-block: 16px;
+  }
+  .app .story .prose p { font-size: 17px; line-height: 1.95; overflow-wrap: anywhere; }
+  .app .story .beat { flex-wrap: wrap; gap: 4px 10px; margin-top: 22px; }
+  .app .opening { margin-top: 12px; padding: 14px; }
+  .app .opening p, .app .drawer-body p { overflow-wrap: anywhere; }
+  .app .notice, .app .if-line, .app .prose-banner, .app .live-prose { overflow-wrap: anywhere; }
+  .app .if-box textarea, .app .intervene textarea {
+    min-height: 80px;
+    max-height: 24dvh;
+    padding: 10px;
+    line-height: 1.6;
+    scroll-margin-block: 20px;
+  }
+  .app .bottom {
+    padding: 8px max(10px, env(safe-area-inset-right, 0px))
+             max(10px, env(safe-area-inset-bottom, 0px))
+             max(10px, env(safe-area-inset-left, 0px));
+  }
+  .app .bottom .bar { gap: 6px; align-items: stretch; }
+  .app .bottom button.ghost, .app .bottom button.primary { padding: 9px 12px; font-size: 13px; }
+  .app .bottom #btn-continue { flex: 1 1 auto; }
+  .app .bottom #status-line {
+    flex: 1 1 100%;
+    width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .app .bottom:has(.intervene:not([hidden])) {
+    max-height: min(50dvh, 360px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-block: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .app .bottom:has(.intervene:not([hidden])) .new-hint {
+    position: static;
+    max-width: 100%;
+    margin-bottom: 8px;
+  }
+  .app .intervene .row { align-items: stretch; }
+  .app .intervene .row span { flex-basis: 100%; overflow-wrap: anywhere; }
+  .app .hints { max-height: 18dvh; overflow-y: auto; overscroll-behavior: contain; overflow-wrap: anywhere; }
+  .app .drawer {
+    width: min(420px, calc(100vw - 16px));
+    height: 100dvh;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  .app .drawer-body {
+    min-height: 0;
+    padding-bottom: max(18px, env(safe-area-inset-bottom, 0px));
+    overflow-wrap: anywhere;
+    overscroll-behavior: contain;
+  }
+
+  body .shell {
+    min-width: 0;
+    min-height: 100dvh;
+    padding: max(16px, env(safe-area-inset-top, 0px))
+             max(14px, env(safe-area-inset-right, 0px))
+             max(16px, env(safe-area-inset-bottom, 0px))
+             max(14px, env(safe-area-inset-left, 0px));
+  }
+  .shell main, .shell .choice, .shell .story-card, .shell .panel { min-width: 0; }
+  .shell .masthead { gap: 14px; padding: 8px 0 22px; }
+  .shell .masthead h1 { font-size: 38px; }
+  .shell .masthead p { font-size: 15px; line-height: 1.6; }
+  .shell .head-actions { flex-wrap: wrap; gap: 8px; margin-top: 16px; align-items: center; }
+  .shell .head-actions .mode { flex: 1 1 100%; overflow-wrap: anywhere; }
+  .shell .head-actions .primary { flex: 1 1 auto; }
+  .shell .head-actions .local-tools-button { min-height: 44px; padding: 10px 12px; font-size: 13px; }
+  .shell .panel { margin-top: 20px; padding: 16px; border-radius: 18px; }
+  .shell .panel-head { gap: 12px; align-items: flex-start; }
+  .shell .panel-head > div { min-width: 0; }
+  .shell .panel h2 { font-size: 23px; }
+  .shell .choice { padding: 16px; }
+  .shell .choice p { min-height: 0; }
+  .shell .choice-grid, .shell .form-grid, .shell .evidence { grid-template-columns: minmax(0, 1fr); }
+  .shell .story-card { padding: 18px; }
+  .shell .story-card h3, .shell p, .shell .evidence article, .shell .source-details { overflow-wrap: anywhere; }
+  .shell .story-actions { gap: 8px; }
+  .shell .story-actions button { min-height: 44px; padding: 10px 12px; }
+  .shell .list-head { gap: 12px; align-items: flex-start; }
+  .shell .list-controls { flex-wrap: wrap; gap: 4px 8px; justify-content: flex-end; min-width: 0; }
+  .shell .list-controls button { padding: 8px 10px; font-size: 13px; }
+  .shell .upload-row input { min-width: 0; max-width: 100%; }
+  .shell .button-row > span { flex-basis: 100%; }
+  .shell footer { flex-direction: column; gap: 6px; line-height: 1.6; overflow-wrap: anywhere; }
+
+  dialog.local-dialog {
+    width: min(540px, calc(100vw - 24px));
+    padding: 18px;
+    border-radius: 14px;
+    -webkit-overflow-scrolling: touch;
+  }
+  dialog.local-dialog .local-dialog-head { gap: 10px; }
+  dialog.local-dialog h2 { min-width: 0; font-size: 20px; }
+  dialog.local-dialog .local-dialog-head button { flex: 0 0 auto; }
+  dialog.local-dialog input, dialog.local-dialog select { min-width: 0; min-height: 44px; }
+  dialog.local-dialog summary { min-height: 44px; padding-block: 10px; cursor: pointer; }
+  dialog.local-dialog .local-dialog-actions { align-items: stretch; gap: 8px; }
+  dialog.local-dialog .local-dialog-actions button { flex: 1 1 130px; }
+  dialog.local-dialog .local-status, dialog.local-dialog .local-note { overflow-wrap: anywhere; }
+  .local-loading .local-loading-card { margin: 16px; padding: 16px; }
+}
+
+@media (max-width: 620px) and (max-height: 480px) {
+  .app .top { gap: 0; }
+  .app .story .prose p { line-height: 1.8; }
+  .app .bottom:has(.intervene:not([hidden])) { max-height: 55dvh; }
+  .app .if-box textarea, .app .intervene textarea { min-height: 64px; }
+  dialog.local-dialog { max-height: min(90dvh, calc(100dvh - 16px)); padding: 14px; }
+}

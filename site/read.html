@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<link rel="stylesheet" href="./style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>阅读 · oc-world</title>
+<link rel="stylesheet" href="./read.css">
+</head>
+<body>
+
+<!--
+  阅读页骨架（单栏阅读器）：
+    .app      整屏 flex 列：顶栏 / 正文（唯一滚动容器）/ 底部
+    .top      固定紧凑：世界标题 + 简短模式标识 + 「世界与人物」+「更多」
+    .stage    独立滚动：正文、等待提示、失败提示都在这里
+    .bottom   固定底部：继续 / 投入一件事（按需展开）/ 状态行
+
+  故事列表在 /；本页通过 story 查询参数绑定一份独立存档。
+-->
+
+<div class="app">
+
+  <header class="top">
+    <div class="titles">
+      <a id="btn-back" class="back-link" href="./index.html" title="返回本地故事列表">← 故事列表</a>
+      <h1 id="world-title">加载中…</h1>
+      <span id="story-name" class="story-name"></span>
+    </div>
+    <div class="top-actions">
+      <span class="badge" id="mode-badge" title="模型提供方">模式…</span>
+      <button id="btn-cast" class="ghost" type="button" aria-expanded="false">世界与人物</button>
+      <div class="more">
+        <button id="btn-more" class="ghost" type="button" aria-expanded="false">更多</button>
+        <div class="menu" id="more-menu" hidden>
+          <p class="menu-note" id="menu-mode-note"></p>
+          <a class="menu-item" id="dev-link" href="#" hidden>开发检查页（后台）</a>
+          <button class="menu-item" id="menu-fill" type="button" hidden>补写缺失的段落</button>
+          <button class="menu-item" id="menu-usage" type="button">上次调用与用量</button>
+          <p class="menu-detail" id="usage-detail" hidden></p>
+          <p class="menu-detail" id="material-note"></p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+  <aside class="drawer" id="drawer" aria-label="世界与人物" hidden>
+    <div class="drawer-head">
+      <h2>世界与人物</h2>
+      <button id="drawer-close" class="ghost" type="button">关闭</button>
+    </div>
+    <div class="drawer-body">
+      <section>
+        <h3>这个世界</h3>
+        <p id="drawer-if" class="if-inline" hidden></p>
+        <p id="world-summary" class="muted small"></p>
+        <p id="world-description"></p>
+      </section>
+      <section>
+        <h3>人物</h3>
+        <div id="cast"></div>
+      </section>
+      <section>
+        <h3>地方</h3>
+        <div id="places"></div>
+      </section>
+      <p class="muted small" id="drawer-note">
+        这里只放公开介绍和正文已出现的地方。人物的私密目标、后台行动和未读后续
+        不会在这里提前展示。
+      </p>
+    </div>
+  </aside>
+
+  <main class="stage" id="stage">
+    <section class="opening" id="opening" hidden>
+      <p class="opening-kicker">这一次要演的世界</p>
+      <h2 id="opening-title">载入中…</h2>
+      <p id="opening-summary" class="muted small"></p>
+      <p id="opening-world" class="muted small"></p>
+      <p id="opening-sources" class="muted small"></p>
+      <div class="opening-block">
+        <h3>故事中的人物</h3>
+        <div id="opening-cast"></div>
+      </div>
+      <div class="opening-block">
+        <h3>已出现的地方</h3>
+        <div id="opening-places" class="places-row"></div>
+      </div>
+      <div class="if-box">
+        <label for="if-input">写下这次的条件（IF）</label>
+        <textarea id="if-input" rows="2"
+          placeholder="写下这次故事与原本世界不同的起始条件。"></textarea>
+        <div class="row">
+          <button id="btn-start" class="primary" type="button">开始演绎</button>
+          <button id="btn-if-example" class="ghost" type="button">看例子</button>
+          <span class="muted small" id="if-note"></span>
+        </div>
+        <div class="if-help muted small" id="if-help"></div>
+      </div>
+    </section>
+    <p class="if-line" id="if-line" hidden></p>
+    <div class="notice warn" id="notice" hidden></div>
+    <div class="prose-banner" id="prose-banner" hidden></div>
+    <div class="story" id="story"></div>
+    <section class="live-prose" id="live-prose" aria-live="polite" hidden>
+      <strong id="live-prose-label">正文生成中（尚未保存）</strong>
+      <div id="live-prose-text"></div>
+    </section>
+    <div class="writing" id="writing" hidden>
+      <span class="ink" aria-hidden="true"></span>
+      <span id="writing-text">正在书写…</span>
+    </div>
+    <div class="empty" id="empty" hidden>
+      <p>这个故事还没有正文。</p>
+      <p class="muted">点下面的「继续」，展开第一章。</p>
+    </div>
+  </main>
+
+  <footer class="bottom">
+    <button class="new-hint" id="new-hint" type="button" hidden>有新内容 ↓</button>
+    <div class="bar">
+      <button id="btn-run" class="primary" type="button" hidden>开始演绎</button>
+      <button id="btn-continue" class="ghost" type="button">继续</button>
+      <button id="btn-end" class="ghost" type="button" hidden>结束演示并保存</button>
+      <button id="btn-retry" class="ghost" type="button" hidden>重试这一步</button>
+      <span class="style-pick" id="style-pick">
+        <span class="muted small">正文</span>
+        <button class="chip" id="style-normal" type="button" data-style="normal"
+                aria-pressed="true">正常</button>
+        <button class="chip" id="style-brief" type="button" data-style="brief"
+                aria-pressed="false">简洁</button>
+      </span>
+      <button id="btn-intervene-toggle" class="ghost" type="button"
+              aria-expanded="false">投入一件事</button>
+      <span class="muted small" id="status-line"></span>
+    </div>
+    <div class="intervene" id="intervene-box" hidden>
+      <textarea id="intervene-input" rows="2"
+        placeholder="写下你希望这个世界发生的一件事，例如：楼梯口的灯突然全部熄了。"></textarea>
+      <div class="row">
+        <button id="btn-intervene" class="ghost" type="button">让它发生</button>
+        <button id="btn-hint" class="ghost" type="button">看例子</button>
+        <span class="muted small" id="intervene-note"></span>
+      </div>
+      <div class="hints" id="hints" hidden></div>
+    </div>
+  </footer>
+
+</div>
+
+<script type="module">
+import { boot } from "./app.js";
+await boot();
+await import("./read.js");
+</script>
+</body>
+</html>
