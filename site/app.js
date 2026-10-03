@@ -1,7 +1,7 @@
 import { BrowserClient } from './runtime.js';
 
 const SESSION_KEY = 'oc-world-api-session-v1';
-const DEFAULT_SETTINGS = {mode:'deepseek', model:'deepseek-flash', base_url:'https://api.deepseek.com', api_key:''};
+const DEFAULT_SETTINGS = {mode:'deepseek', model:'deepseek-flash', base_url:'https://api.deepseek.com', api_key:'', prepare_chapters:1};
 let publicSettings = {...DEFAULT_SETTINGS};
 let client;
 let savedBadge;
@@ -36,6 +36,8 @@ function createTools() {
       <label>生成方式<select id="local-mode"><option value="deepseek">DeepSeek · 使用自己的 API</option><option value="fake">模拟流程 · 不调用 API</option></select></label>
       <label>API Key<input id="local-api-key" type="password" autocomplete="off" spellcheck="false" placeholder="填入自己的 API Key"></label>
       <label>模型<input id="local-model" autocomplete="off" value="deepseek-flash"></label>
+      <label>章节准备<select id="local-prepare-chapters"><option value="1">先生成当前一章</option><option value="2">同时准备下一章（等待更久）</option></select></label>
+      <p>默认先让当前一章可读。选择同时准备下一章会增加本次等待和调用；已有保存的后续仍按原文接续。</p>
       <details><summary>API 地址</summary><label>地址<input id="local-base-url" type="url" autocomplete="off" value="https://api.deepseek.com"></label><p>其他兼容服务需要允许浏览器直接访问，也可能不支持当前协议。</p></details>
       <p>密钥仅保留在当前标签页会话，方便在列表和阅读页之间切换；不会写入故事或导出的存档。保存设置不会调用模型。</p>
       <div class="local-dialog-actions"><button class="primary" id="local-save-settings" type="submit">保存设置</button><button id="local-forget-key" type="button">清除密钥</button></div>
@@ -60,6 +62,7 @@ function createTools() {
     $('local-mode').value = settings.mode;
     $('local-api-key').value = settings.api_key;
     $('local-model').value = settings.model;
+    $('local-prepare-chapters').value = String(settings.prepare_chapters);
     $('local-base-url').value = settings.base_url;
     $('local-storage-status').textContent = client?.storageError
       ? '本地保存遇到问题，请保持页面打开并导出备份。'
@@ -77,7 +80,8 @@ function createTools() {
     setControls(true);
     try {
       const settings = {mode:$('local-mode').value, model:$('local-model').value.trim(),
-        base_url:$('local-base-url').value.trim(), api_key:$('local-api-key').value.trim()};
+        base_url:$('local-base-url').value.trim(), api_key:$('local-api-key').value.trim(),
+        prepare_chapters:Number($('local-prepare-chapters').value)};
       await client.setSettings(settings);
       sessionStorage.setItem(SESSION_KEY, JSON.stringify(settings));
       note('设置已保存，正在重新打开本地故事库。');
@@ -174,7 +178,8 @@ export async function boot() {
     await client.initialize();
     const stored = await client.getSettings();
     publicSettings = {mode:stored.mode || DEFAULT_SETTINGS.mode,
-      model:stored.model || DEFAULT_SETTINGS.model, base_url:stored.base_url || DEFAULT_SETTINGS.base_url, api_key:''};
+      model:stored.model || DEFAULT_SETTINGS.model, base_url:stored.base_url || DEFAULT_SETTINGS.base_url, api_key:'',
+      prepare_chapters:stored.prepare_chapters || DEFAULT_SETTINGS.prepare_chapters};
     await client.setSettings(sessionSettings());
     window.ocWorldClient = client;
     localFetchBridge();

@@ -932,7 +932,18 @@ function toggleUsage() {
         + accountingText(lastIfAccounting));
     }
     if (lastAdvanceAccounting) lines.push('世界与人物：' + accountingText(lastAdvanceAccounting));
-    if (lastAccounting) lines.push('正文：' + accountingText(lastAccounting));
+    if (lastAccounting) lines.push((view && view.engine_mode === 'chapters' ? '章节生成：' : '正文：') + accountingText(lastAccounting));
+    const cacheSummary = (stats) => {
+      if (!stats) return;
+      const cache = stats.cache_tokens;
+      if (stats.cache_usage_known && cache && Number.isFinite(stats.cache_hit_rate)) {
+        lines.push('输入缓存：命中 ' + cache.hit + ' · 未命中 ' + cache.miss
+          + ' · 输入命中率 ' + (stats.cache_hit_rate * 100).toFixed(1) + '%（仅以输入为分母）');
+      } else if (stats.cache_usage_known === false) {
+        lines.push('输入缓存：服务未返回完整统计，不能据此计算本次命中率。');
+      }
+    };
+    cacheSummary(lastAdvanceAccounting); cacheSummary(lastAccounting);
     const stages = (stats) => ((stats && stats.calls) || []).forEach((call) => {
       const name = call.stage + (call.actor_id ? '/' + call.actor_id : '');
       const transport = call.transport || {};
@@ -940,6 +951,11 @@ function toggleUsage() {
       if (transport.connect_ms !== undefined) bits.push('连接 ' + (transport.connect_ms / 1000).toFixed(2));
       if (transport.headers_wait_ms !== undefined) bits.push('等头 ' + (transport.headers_wait_ms / 1000).toFixed(2));
       if (transport.body_ms !== undefined) bits.push('读体 ' + (transport.body_ms / 1000).toFixed(2));
+      if (call.tokens && Number.isFinite(call.tokens.prompt)) bits.push('输入 ' + call.tokens.prompt);
+      if (call.tokens && Number.isFinite(call.tokens.completion)) bits.push('输出 ' + call.tokens.completion);
+      if (call.tokens && Number.isFinite(call.tokens.prompt_cache_hit_tokens) && Number.isFinite(call.tokens.prompt_cache_miss_tokens)) {
+        bits.push('缓存命中 ' + call.tokens.prompt_cache_hit_tokens + ' / 未命中 ' + call.tokens.prompt_cache_miss_tokens);
+      }
       if (call.tokens && call.tokens.reasoning !== undefined) bits.push('推理 token ' + call.tokens.reasoning);
       lines.push(name + '：' + bits.join(' · '));
     });
@@ -1038,7 +1054,10 @@ async function boot() {
     toBottom('auto');            // 打开就停在最新一段
     const started = !!(data.run && data.run.if_condition);
     const supported = ((data.if_options || {}).supported || []).length;
-    if (supported && !started) {
+    if (data.last_failure) {
+      notice('上次章节生成未完成：' + data.last_failure.error, 'bad');
+      $('btn-retry').hidden = false;
+    } else if (supported && !started) {
       notice('这是这一次要演的世界。写下你的条件，点「开始演绎」才会开始调用模型。');
     } else if (!(data.segments || []).length && !(data.missing_ticks || []).length) {
       notice(data.engine_mode === 'chapters'

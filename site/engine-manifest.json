@@ -2,7 +2,7 @@
   "format": "oc-world-engine",
   "version": 1,
   "pyodide": "0.27.7",
-  "sha256": "1b76418295d6ec53b4ebac97d837fee832b26bd1023adb6208fe608d0e945e05",
+  "sha256": "1e20bb6a5b6bfd5acdbd04f3730e838c42a454cb8121cfdc4990172a281cb912",
   "files": [
     {
       "path": "src/__init__.py",
@@ -16,33 +16,33 @@
     },
     {
       "path": "src/browser_provider.py",
-      "sha256": "adab38a4f5599221472c1df180e1f202d9dd04e6c836fbb07f7a5e8b3dd6c4dd",
-      "bytes": 4850
+      "sha256": "e5d4ff9b7e333a7591dc7a11554696cf0ff13529650f2152adb88bc9de76daff",
+      "bytes": 5275
     },
     {
       "path": "src/browser_runtime.py",
-      "sha256": "1cb29b2907cf77cec1558707fa6e686745135a53710fec3e65dfa2b572ca259a",
-      "bytes": 19499
+      "sha256": "ce007755e5fdcb383b22db16dd85710110f8bf29c151220d483056aca40db4b7",
+      "bytes": 19896
     },
     {
       "path": "src/chapter_protocol.py",
-      "sha256": "8ffeeb97a7c70ac4a0c3bb3a620ab3b26004ec28d804418451a0c5cc1cd500df",
-      "bytes": 14666
+      "sha256": "4e7cfa4fb888cb37d6a473240acd6218bf9b65323505d0d20f7f64b379e3e33d",
+      "bytes": 15890
     },
     {
       "path": "src/chapter_store.py",
-      "sha256": "cd2658a6a6fa71b5654300e3d9d1dcc1262f88053b6675c33cab5b0f573262cd",
-      "bytes": 10777
+      "sha256": "3c241f8876d9125e6e209c258917d4716ece47a996e12499f2e473af8943e825",
+      "bytes": 15028
     },
     {
       "path": "src/chapter_view.py",
-      "sha256": "c35d03c98c2ce7e5026a117bcb27e5682424d6308293a4b1bd92081d27d7dfa7",
-      "bytes": 3887
+      "sha256": "86cbbb6d024871e983de642072b9c71ef23096121870ff1ce6d8a789f92a44d4",
+      "bytes": 6236
     },
     {
       "path": "src/chapters.py",
-      "sha256": "df4351b50ab6f10692a3bc25fd09fe260da33fcbccde7ad1da82a4efc1dda030",
-      "bytes": 30695
+      "sha256": "153be20a626f4fd10696b12f9702c25fc943f573ac02f2691044b3371036be53",
+      "bytes": 38873
     },
     {
       "path": "src/context.py",
@@ -56,8 +56,8 @@
     },
     {
       "path": "src/deepseek.py",
-      "sha256": "a25e69f5b24a917b557fe3ab728d26ae4eebdd2b9070fbb1000223769f211287",
-      "bytes": 69957
+      "sha256": "2201c1119e5090be403580d034cc6712b7ae5729b4b914ae977d498722f29657",
+      "bytes": 71611
     },
     {
       "path": "src/demo.py",
@@ -98,6 +98,11 @@
       "path": "src/notes.py",
       "sha256": "957cdbce49038b87c170713bf68199bf1067da8f96e38864724365c5b599fe80",
       "bytes": 6734
+    },
+    {
+      "path": "src/prompt_layout.py",
+      "sha256": "7a7a62e58209b28e59fffa566b0b756686ee26e645c57a8cac3d905d8e3b0ef7",
+      "bytes": 3868
     },
     {
       "path": "src/provider.py",
