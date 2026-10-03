@@ -2,7 +2,7 @@
   "format": "oc-world-engine",
   "version": 1,
   "pyodide": "0.27.7",
-  "sha256": "1e20bb6a5b6bfd5acdbd04f3730e838c42a454cb8121cfdc4990172a281cb912",
+  "sha256": "02150553f87c197a71782f60cdc5c63302f1b49a41439132e3b27a889cfd50fd",
   "files": [
     {
       "path": "src/__init__.py",
@@ -31,18 +31,18 @@
     },
     {
       "path": "src/chapter_store.py",
-      "sha256": "3c241f8876d9125e6e209c258917d4716ece47a996e12499f2e473af8943e825",
-      "bytes": 15028
+      "sha256": "f741d4a50e1664a1d0ca144a89b02cf8fd96b3db7f655edbcc56f16475b76667",
+      "bytes": 15729
     },
     {
       "path": "src/chapter_view.py",
-      "sha256": "86cbbb6d024871e983de642072b9c71ef23096121870ff1ce6d8a789f92a44d4",
-      "bytes": 6236
+      "sha256": "43b9b3e51e524f1252d8fcd140e2f74ad0db761a5f8a00a1f7c97f3df582ed09",
+      "bytes": 6310
     },
     {
       "path": "src/chapters.py",
-      "sha256": "153be20a626f4fd10696b12f9702c25fc943f573ac02f2691044b3371036be53",
-      "bytes": 38873
+      "sha256": "72223dbe4cd3ea1919c0e7aa67d7d8db1581a0fbe4a6063175d573125631a439",
+      "bytes": 39536
     },
     {
       "path": "src/context.py",
@@ -56,8 +56,8 @@
     },
     {
       "path": "src/deepseek.py",
-      "sha256": "2201c1119e5090be403580d034cc6712b7ae5729b4b914ae977d498722f29657",
-      "bytes": 71611
+      "sha256": "cf6b894c5a61c6d810748c4553a106f6bf2463ae9a3498f9701a7bc9aa6a788f",
+      "bytes": 71816
     },
     {
       "path": "src/demo.py",

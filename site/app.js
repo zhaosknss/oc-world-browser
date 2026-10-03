@@ -72,6 +72,11 @@ function createTools() {
   $('local-close').addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
   const controls = ['local-save-settings','local-forget-key','local-export','local-import'];
+  let archiveUrl = null;
+  const archiveLink = element('a', 'local-download-link', '点击下载已准备好的完整存档');
+  archiveLink.id = 'local-download-ready';
+  archiveLink.hidden = true;
+  $('local-tools-note').after(archiveLink);
   function setControls(disabled) { controls.forEach(id => $(id).disabled = disabled); }
   window.addEventListener('oc-world-busy', () => setControls(isBusy));
   $('local-settings-form').addEventListener('submit', async event => {
@@ -103,13 +108,13 @@ function createTools() {
     setControls(true);
     try {
       const blob = await client.exportArchive();
+      if (archiveUrl) URL.revokeObjectURL(archiveUrl);
       const url = URL.createObjectURL(blob);
-      const link = element('a');
-      link.href = url;
-      link.download = 'oc-world-' + new Date().toISOString().slice(0,10) + '.ocworld.json';
-      document.body.append(link); link.click(); link.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 10000);
-      note('完整存档文件已准备下载。文件不包含 API 密钥。');
+      archiveUrl = url;
+      archiveLink.href = url;
+      archiveLink.download = 'oc-world-' + new Date().toISOString().slice(0,10) + '.ocworld.json';
+      archiveLink.hidden = false;
+      note('完整存档已准备好，点击下方链接下载。文件不包含 API 密钥。');
     } catch (error) { note(error.message, true); }
     finally { setControls(false); }
   });

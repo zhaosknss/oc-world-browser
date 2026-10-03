@@ -957,6 +957,7 @@ function toggleUsage() {
         bits.push('缓存命中 ' + call.tokens.prompt_cache_hit_tokens + ' / 未命中 ' + call.tokens.prompt_cache_miss_tokens);
       }
       if (call.tokens && call.tokens.reasoning !== undefined) bits.push('推理 token ' + call.tokens.reasoning);
+      if (call.ok === false) bits.push('失败类型 ' + (call.error_type || '未提供'));
       lines.push(name + '：' + bits.join(' · '));
     });
     stages(lastAdvanceAccounting);

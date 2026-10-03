@@ -206,3 +206,10 @@ dialog.local-dialog {
   .app .if-box textarea, .app .intervene textarea { min-height: 64px; }
   dialog.local-dialog { max-height: min(90dvh, calc(100dvh - 16px)); padding: 14px; }
 }
+.local-download-link {
+  display: block;
+  min-height: 44px;
+  padding: 12px 4px;
+  font-size: 16px;
+}
+.local-download-link[hidden] { display: none; }
