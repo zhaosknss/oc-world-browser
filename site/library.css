@@ -3,3 +3,4 @@
 .list-controls{display:flex;align-items:center;gap:12px}.list-controls button{font-size:12px;padding:5px 9px}
 
 .source-details{margin:16px 0;color:#4b6250;font-size:13px}.source-details summary{cursor:pointer;font-weight:700}.source-details div div{padding:6px 0;border-bottom:1px solid #e6ece3}
+.workbench-link{color:#286b42;font-size:14px;text-decoration:none;border:1px solid #c8dcc9;border-radius:10px;padding:11px 13px;white-space:nowrap;background:#e6eee4;min-height:44px}.workbench-link:focus-visible{outline:3px solid #87b99a;outline-offset:3px}.head-actions{flex-wrap:wrap}.workbench-link:hover{background:#dce9d9}

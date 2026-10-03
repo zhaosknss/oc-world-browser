@@ -2,7 +2,7 @@
   "format": "oc-world-engine",
   "version": 1,
   "pyodide": "0.27.7",
-  "sha256": "5ab35c51fbb62d09ac25c86107b70249bba009d96d9a3a16dd4d214719b26ff0",
+  "sha256": "1b76418295d6ec53b4ebac97d837fee832b26bd1023adb6208fe608d0e945e05",
   "files": [
     {
       "path": "src/__init__.py",
@@ -21,8 +21,8 @@
     },
     {
       "path": "src/browser_runtime.py",
-      "sha256": "3a0561dc7007cfd25141dc9d12723a51d9a07b67ef1fcc16f8b00df482ec5c14",
-      "bytes": 18411
+      "sha256": "1cb29b2907cf77cec1558707fa6e686745135a53710fec3e65dfa2b572ca259a",
+      "bytes": 19499
     },
     {
       "path": "src/chapter_protocol.py",
@@ -61,8 +61,8 @@
     },
     {
       "path": "src/demo.py",
-      "sha256": "10cd01a62c2f9775fa1692e7152866c39103d112887113cb844d976709a7517d",
-      "bytes": 37161
+      "sha256": "1d980c8314c376fe26c6e986aff7eac4854fad0d93ac50e2370812c535b776ea",
+      "bytes": 37648
     },
     {
       "path": "src/engine.py",
@@ -81,8 +81,8 @@
     },
     {
       "path": "src/library.py",
-      "sha256": "270c9356b5a2895e012034b13b6eb0531d99fbd40afc1e66d1e80ce5e78354d6",
-      "bytes": 30966
+      "sha256": "d0e9b0829b46c17391f132412c73f12cbedc6c265e53c2ae031fb1ef854282d9",
+      "bytes": 40355
     },
     {
       "path": "src/models.py",
@@ -108,6 +108,11 @@
       "path": "src/scenario.py",
       "sha256": "1ba80fa66d31c9e2e3e37d3807d439f5a8340cffde039edbf0c926559ff06742",
       "bytes": 11145
+    },
+    {
+      "path": "src/setting_workbench.py",
+      "sha256": "f262d88ddc6137d0799947eb366fc4deb27bae781854fe2742ec72f89b4bd6d6",
+      "bytes": 9960
     },
     {
       "path": "src/settlement.py",

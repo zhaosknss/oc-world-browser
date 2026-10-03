@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<link rel="stylesheet" href="./style.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>设定工作台 · oc-world</title>
+<link rel="stylesheet" href="./library.css">
+<link rel="stylesheet" href="./workbench.css">
+</head>
+<body>
+<div class="shell workbench-shell">
+  <header class="masthead">
+    <div><span class="eyebrow">OC WORLD · 测试版</span><h1>设定工作台</h1><p>从一个想法聊起，把讨论整理成可以使用的世界。</p></div>
+    <div class="head-actions"><a class="back-link" href="./index.html">返回故事列表</a><span id="wb-mode" class="mode">载入中…</span></div>
+  </header>
+  <main>
+    <p id="wb-status" class="notice" role="status" hidden></p>
+    <div class="workbench-grid">
+      <section class="workbench-column discussion-column" aria-labelledby="discussion-title">
+        <div class="column-head"><div><span class="eyebrow">讨论稿</span><h2 id="discussion-title">想法与材料</h2></div><button id="wb-example" class="quiet" type="button">看一个示例</button></div>
+        <details class="materials-section" open>
+          <summary>已有设定或聊天记录</summary>
+          <label for="wb-materials" class="small">可以直接粘贴材料，也可以留空，从下面开始聊。</label>
+          <textarea id="wb-materials" rows="6" placeholder="例如：我想写一间深夜仍开门的书店。店主好像在等一个人，但原因我还没想好。"></textarea>
+          <div class="file-row"><label class="file-button" for="wb-file">加入 TXT / Markdown</label><input id="wb-file" type="file" accept=".txt,.md,.markdown" hidden><span class="small">材料与讨论合计最多 256 KB</span></div>
+        </details>
+        <div id="wb-messages" class="discussion-log" role="log" aria-label="设定讨论" aria-live="polite"></div>
+        <form id="wb-chat-form" class="composer">
+          <label for="wb-message">继续聊聊</label>
+          <textarea id="wb-message" rows="3" placeholder="说说你在意的人物、关系或场景，也可以纠正刚才的理解。"></textarea>
+          <div class="button-row"><button id="wb-send" class="primary" type="submit">发给 AI</button><span class="small">讨论和整理使用你设置的 API</span></div>
+        </form>
+        <div class="workbench-tools"><button id="wb-guide" class="quiet" type="button">下载外部 AI 提示词</button><button id="wb-notes" class="quiet" type="button">下载讨论记录</button><button id="wb-clear" class="quiet" type="button">清空工作台</button></div>
+      </section>
+      <section class="workbench-column setting-column" aria-labelledby="setting-title">
+        <div class="column-head"><div><span class="eyebrow">设定稿</span><h2 id="setting-title">整理与检查</h2></div><button id="wb-organize" class="primary" type="button">整理设定</button></div>
+        <label class="fill-option"><input id="wb-fill" type="checkbox">允许 AI 补齐缺漏，保留有意留白</label>
+        <p class="small">整理后先预览，仍可修改或回到左边继续讨论。</p>
+        <div id="wb-empty" class="setting-empty"><span aria-hidden="true" class="sheet-mark">＋</span><h3>想法还在形成也没关系</h3><p>先放入材料，或聊聊一个人物。准备好了，点“整理设定”。</p></div>
+        <div id="wb-preview" hidden>
+          <p id="wb-preview-note" class="small"></p>
+          <div class="form-grid"><label>世界名称<input id="wb-title"></label><label>简介<input id="wb-summary"></label></div>
+          <label>公开介绍<textarea id="wb-public" rows="3"></textarea><span class="field-help">读者和人物可以先知道的背景。</span></label>
+          <label>后台设定<textarea id="wb-description" rows="5"></textarea><span class="field-help">世界规则、幕后事实及需要保留的秘密。</span></label>
+          <div id="wb-people"></div><div id="wb-places"></div>
+          <details class="review-details" open><summary>缺漏、矛盾与补充</summary><div id="wb-evidence" class="evidence"></div></details>
+          <details class="review-details"><summary>查看来源</summary><div id="wb-sources" class="source-lines"></div></details>
+          <details class="review-details"><summary>完整 JSON 与进阶编辑</summary><p class="small">地图、物品、初始位置等可以在这里修改。应用前会做本地校验。</p><label for="wb-json">世界 JSON</label><textarea id="wb-json" rows="14" spellcheck="false"></textarea><button id="wb-apply-json" class="secondary" type="button">应用 JSON 并校验</button></details>
+          <div class="export-actions"><button id="wb-download" class="secondary" type="button">下载世界 JSON</button><button id="wb-save" class="secondary" type="button">保存为世界</button><button id="wb-create" class="primary" type="button">用这个世界创建故事</button></div>
+          <p class="small">校验、下载和保存不调用模型。JSON 含后台设定；读者界面按故事逐步揭示。</p>
+        </div>
+      </section>
+    </div>
+  </main>
+  <footer><span id="wb-save-note">讨论与设定保存在此设备</span><span>测试版 · 欢迎带着实际使用反馈继续完善</span></footer>
+</div>
+<script type="module">
+import { boot } from "./app.js";
+await boot();
+await import("./workbench.js");
+</script>
+</body>
+</html>
