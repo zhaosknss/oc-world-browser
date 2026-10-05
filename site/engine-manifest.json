@@ -2,7 +2,7 @@
   "format": "oc-world-engine",
   "version": 1,
   "pyodide": "0.27.7",
-  "sha256": "d21a5313cc4082a856ce6ac602ef97e001dc48c99c202c368598083d25f41642",
+  "sha256": "cd2ff215d1e9d31ef0569361c93721e0362fce0675d6bb5b5a1a9abb82cd876b",
   "files": [
     {
       "path": "src/__init__.py",
@@ -21,13 +21,13 @@
     },
     {
       "path": "src/browser_runtime.py",
-      "sha256": "5b63fcedae3285de1631fbe5766b38185859f3d9ec45bd2646c1554a764cd2b7",
-      "bytes": 20234
+      "sha256": "119017acbbe377f2d220da5d2c12d83822a39dfb3b5b93c6873f33256d9acacf",
+      "bytes": 20352
     },
     {
       "path": "src/chapter_protocol.py",
-      "sha256": "4e77686145dd7ceedf4c04f7d4dc8ef520d6d0e72eafa6659d0bc7ea058efbaa",
-      "bytes": 17077
+      "sha256": "030666d1e63a75427a4fdff93b10fe22cefa0d8a4bce11780a2dc9ed8267d21b",
+      "bytes": 19337
     },
     {
       "path": "src/chapter_store.py",
@@ -41,13 +41,13 @@
     },
     {
       "path": "src/chapters.py",
-      "sha256": "4b0cc8a5636d3b2f1ae1240b48c2155bba9da8a3048e9ca569c1e48428784f26",
-      "bytes": 40151
+      "sha256": "0f3f7e402f812532ea3463d0392bf0458ff6b692bd66b2f3503d5b590f6e0f82",
+      "bytes": 40620
     },
     {
       "path": "src/context.py",
-      "sha256": "e4790e75ac57379da41cf69cfac33675e2031ab02708fd5124d2450fd67e492b",
-      "bytes": 18449
+      "sha256": "7cd7af1a1fa11a91d6a1a5bddd6556ad980c797fe6495ae8dfb6b107f6696122",
+      "bytes": 21226
     },
     {
       "path": "src/db.py",
@@ -81,8 +81,8 @@
     },
     {
       "path": "src/library.py",
-      "sha256": "d0e9b0829b46c17391f132412c73f12cbedc6c265e53c2ae031fb1ef854282d9",
-      "bytes": 40355
+      "sha256": "5accc35843b430b999688544ebb8a9ea5ecc23da6e38674f3e056476c300fb50",
+      "bytes": 43786
     },
     {
       "path": "src/models.py",
@@ -101,8 +101,8 @@
     },
     {
       "path": "src/prompt_layout.py",
-      "sha256": "7a7a62e58209b28e59fffa566b0b756686ee26e645c57a8cac3d905d8e3b0ef7",
-      "bytes": 3868
+      "sha256": "934e01e17297aaa11bd7bc11fc8da4e1050e3455cded298997366d994ca5fa9f",
+      "bytes": 4001
     },
     {
       "path": "src/provider.py",
@@ -111,13 +111,13 @@
     },
     {
       "path": "src/scenario.py",
-      "sha256": "1ba80fa66d31c9e2e3e37d3807d439f5a8340cffde039edbf0c926559ff06742",
-      "bytes": 11145
+      "sha256": "12005ced232928e0f0b30c52f63126bd734277980ba53924a85fb1dcfee9287e",
+      "bytes": 20131
     },
     {
       "path": "src/setting_workbench.py",
-      "sha256": "f262d88ddc6137d0799947eb366fc4deb27bae781854fe2742ec72f89b4bd6d6",
-      "bytes": 9960
+      "sha256": "1fffcf7b0fd7d4b1e2da12fb6e7fc875a8bb0e25367cce191682abb343b09a2e",
+      "bytes": 10828
     },
     {
       "path": "src/settlement.py",

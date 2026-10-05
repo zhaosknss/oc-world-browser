@@ -17,6 +17,7 @@ let savedWorld = null;
 let savedScenario = '';
 let jsonDirty = false;
 let demoMode = false;
+let storyCharacterIds = null;
 
 function note(text, error=false) {
   $('wb-status').hidden = !text;
@@ -25,7 +26,7 @@ function note(text, error=false) {
 }
 function setBusy(value) {
   busy = value;
-  document.querySelectorAll('.workbench-shell button, .workbench-shell textarea, .workbench-shell input').forEach(n => { n.disabled = value; });
+  document.querySelectorAll('.workbench-shell button, .workbench-shell textarea, .workbench-shell input, .workbench-shell select').forEach(n => { n.disabled = value; });
 }
 function workspace() {
   return {materials:$('wb-materials').value, messages:state.messages,
@@ -77,10 +78,83 @@ function field(parent, title, value, name, index, kind, rows=3) {
   input.dataset.kind = kind; input.dataset.index = index; input.dataset.field = name;
   label.append(input); parent.append(label);
 }
+function profileChanged() {
+  collectPreview(); savedWorld = null; scheduleSave();
+}
+function personSelect(value, optional=false) {
+  const select = element('select');
+  if (optional) { const option = element('option', '', '不指定对象'); option.value = ''; select.append(option); }
+  for (const person of state.scenario.characters) {
+    const option = element('option', '', person.name); option.value = person.id; select.append(option);
+  }
+  select.value = value || '';
+  return select;
+}
+function profileInput(parent, title, value, key, rows=2) {
+  const label = element('label', '', title), input = element('textarea');
+  input.rows = rows; input.value = value || ''; input.dataset.profileField = key;
+  label.append(input); parent.append(label);
+}
+function profileRow(value, kind) {
+  const row = element('article', 'profile-item'); row.profileValue = {...value};
+  if (kind === 'relationships') {
+    const label = element('label', '', '关系对象'), select = personSelect(value.target_id);
+    select.dataset.profileField = 'target_id'; label.append(select); row.append(label);
+    profileInput(row, '本人怎样看待对方', value.description, 'description');
+  } else {
+    profileInput(row, '示例情境', value.situation, 'situation');
+    profileInput(row, '这个人会怎样说', value.text, 'text', 3);
+    const label = element('label', '', '说话对象（可留空）'), select = personSelect(value.partner_id, true);
+    select.dataset.profileField = 'partner_id'; label.append(select); row.append(label);
+    const safe = element('label', 'profile-check'), checkbox = element('input');
+    checkbox.type = 'checkbox'; checkbox.checked = value.reader_safe === true; checkbox.dataset.profileField = 'reader_safe';
+    safe.append(checkbox, element('span', '', '允许作者参考这条示例，不含角色秘密'));
+    row.append(safe);
+  }
+  const remove = element('button', 'quiet profile-remove', '删除这条'); remove.type = 'button';
+  remove.onclick = () => { if (busy) return; row.remove(); profileChanged(); };
+  row.append(remove); return row;
+}
+function profileCollection(parent, person, index, kind) {
+  const section = element('section', 'profile-section'); section.dataset.profileList = kind; section.dataset.personIndex = index;
+  const relations = kind === 'relationships';
+  section.append(element('h4', '', relations ? '关系' : '对白示例'));
+  section.append(element('p', 'field-help', relations ? '写这个人的看法与态度；不代表对方的秘密或真实想法。' : '少量情境和短对白即可。这里只示范说话方式，不会变成故事里发生过的事。'));
+  const list = element('div', 'profile-items');
+  for (const value of person[kind] || []) list.append(profileRow(value, kind));
+  const add = element('button', 'secondary profile-add', relations ? '＋ 添加关系' : '＋ 添加对白示例'); add.type = 'button';
+  add.onclick = () => {
+    if (busy) return;
+    const target = state.scenario.characters.find(item => item.id !== person.id) || person;
+    list.append(profileRow(relations ? {target_id:target.id, description:''} : {situation:'', text:'', reader_safe:false}, kind));
+    profileChanged();
+  };
+  section.append(list, add); parent.append(section);
+}
+function renderStoryCasting() {
+  const pack = state.scenario, parent = $('wb-story-casting'); parent.replaceChildren();
+  if (!pack) return;
+  const defaults = pack.world?.casting?.default_character_ids || pack.characters.map(person => person.id);
+  const selected = new Set(storyCharacterIds === null ? defaults : storyCharacterIds);
+  storyCharacterIds = pack.characters.filter(person => selected.has(person.id)).map(person => person.id);
+  const group = element('fieldset', 'casting-picker');
+  group.append(element('legend', '', '本次可登场人物'));
+  group.append(element('p', 'small', '创建故事时至少选一位。人物会按剧情需要登场；此选择不改世界的默认名单。'));
+  const choices = element('div', 'casting-options');
+  const remember = () => { storyCharacterIds = [...choices.querySelectorAll('input')].filter(input => input.checked).map(input => input.dataset.characterId); };
+  for (const person of pack.characters) {
+    const label = element('label', 'casting-option'), input = element('input');
+    input.type = 'checkbox'; input.dataset.characterId = person.id; input.checked = selected.has(person.id);
+    input.onchange = remember; label.append(input, element('span', '', person.name)); choices.append(label);
+  }
+  const all = element('button', 'quiet casting-all', '全选'); all.type = 'button';
+  all.onclick = () => { choices.querySelectorAll('input').forEach(input => { input.checked = true; }); remember(); };
+  group.append(choices, all); parent.append(group);
+}
 function renderPreview(message='整理完成，可以修改设定或继续讨论。') {
   const pack = state.scenario;
   $('wb-preview').hidden = !pack; $('wb-empty').hidden = !!pack;
-  if (!pack) return;
+  if (!pack) { $('wb-story-casting').replaceChildren(); return; }
   jsonDirty = false;
   $('wb-preview-note').textContent = message;
   $('wb-title').value = pack.title || ''; $('wb-summary').value = pack.summary || '';
@@ -95,6 +169,11 @@ function renderPreview(message='整理完成，可以修改设定或继续讨论
     field(card, '目标（每行一项）', person.goals, 'goals', index, 'characters');
     field(card, '遇事可能怎么反应', person.situational_cues, 'situational_cues', index, 'characters');
     field(card, '称呼与代词', person.pronouns, 'pronouns', index, 'characters', 1);
+    field(card, '说话方式（公开风格，可留空）', person.voice, 'voice', index, 'characters', 2);
+    field(card, '什么情况适合登场（可留空）', person.entrance_cues, 'entrance_cues', index, 'characters', 2);
+    card.append(element('p', 'field-help', '登场线索供安排剧情参考，不要求人物照着行动。'));
+    profileCollection(card, person, index, 'relationships');
+    profileCollection(card, person, index, 'dialogue_examples');
     people.append(card);
   });
   const places = $('wb-places'); places.replaceChildren(element('h3', '', '地点 · ' + pack.locations.length));
@@ -109,15 +188,31 @@ function renderPreview(message='整理完成，可以修改设定或继续讨论
   $('wb-sources').replaceChildren(...(pack.sources || []).map(source => element('div', '',
     (source.field || '') + ' ← ' + (source.doc || '') + '：' + (source.note || ''))));
   $('wb-json').value = JSON.stringify(pack, null, 2);
+  renderStoryCasting();
 }
 function collectPreview() {
   if (!state.scenario) return;
   const pack = state.scenario;
   pack.title = $('wb-title').value; pack.summary = $('wb-summary').value;
   pack.world.description = $('wb-description').value; pack.world.public_description = $('wb-public').value;
-  document.querySelectorAll('#wb-people textarea, #wb-places textarea').forEach(input => {
+  document.querySelectorAll('#wb-people textarea[data-field], #wb-places textarea[data-field]').forEach(input => {
     const item = pack[input.dataset.kind][Number(input.dataset.index)];
     item[input.dataset.field] = input.dataset.field === 'goals' ? input.value.split('\n').map(s => s.trim()).filter(Boolean) : input.value;
+  });
+  document.querySelectorAll('#wb-people [data-profile-list]').forEach(section => {
+    const kind = section.dataset.profileList, person = pack.characters[Number(section.dataset.personIndex)];
+    const values = [...section.querySelectorAll('.profile-item')].map(row => {
+      const value = {...row.profileValue};
+      row.querySelectorAll('[data-profile-field]').forEach(input => {
+        const key = input.dataset.profileField;
+        if (key === 'reader_safe') value[key] = input.checked;
+        else if (key === 'partner_id' && !input.value) delete value[key];
+        else value[key] = input.value;
+      });
+      return value;
+    });
+    // Empty optional collections stay absent on older packs until edited.
+    if (values.length || kind in person) person[kind] = values;
   });
   if (!jsonDirty) $('wb-json').value = JSON.stringify(pack, null, 2);
 }
@@ -184,6 +279,7 @@ async function downloadWorld() {
 async function saveWorld(createStory=false) {
   if (busy) return; setBusy(true);
   try {
+    if (createStory && !storyCharacterIds?.length) throw new Error('请至少选择一位本次可登场人物。');
     const result = await checkedPreview(), signature = JSON.stringify(result.scenario);
     if (!savedWorld || signature !== savedScenario) {
       const saved = await api('/api/library/save-world', {draft_id:result.draft_id, edits:{}});
@@ -191,7 +287,7 @@ async function saveWorld(createStory=false) {
     }
     await saveWorkspace();
     if (createStory) {
-      const story = await api('/api/library/story', {world_id:savedWorld, title:state.scenario.title + ' · 新故事'});
+      const story = await api('/api/library/story', {world_id:savedWorld, title:state.scenario.title + ' · 新故事', character_ids:[...storyCharacterIds]});
       setBusy(false);
       location.href = './read.html?story=' + encodeURIComponent(story.id);
     } else { note('世界已保存。返回故事列表时可以选它创建故事。'); }
@@ -222,6 +318,7 @@ async function example() {
     state = {materials:'示例世界：' + JSON.stringify(result.scenario, null, 2), messages:[], scenario:result.scenario,
       evidence:{confirmed:['这是现有内置世界，供查看编辑、下载和创建故事的流程。'], unknown:[], conflicts:[], defaults:[]}};
     $('wb-materials').value = state.materials; savedWorld = null;
+    storyCharacterIds = null;
     renderMessages(); renderPreview('内置示例。可以直接编辑或下载；没有调用模型。'); await saveWorkspace(); note('示例已载入。');
   } catch (error) { note('示例未载入：' + error.message, true); }
   finally { setBusy(false); }
@@ -237,10 +334,11 @@ async function clearWorkspace() {
   if (busy || !confirm('清空当前材料、讨论与预览？已保存的世界和故事会保留。')) return;
   setBusy(true);
   const previous = JSON.parse(JSON.stringify(state));
+  const previousSelection = storyCharacterIds;
   try {
     state = {materials:'', messages:[], scenario:null, evidence:{}}; $('wb-materials').value = '';
-    await saveWorkspace(); $('wb-message').value = ''; savedWorld = null; renderMessages(); renderPreview(); note('工作台已清空。');
-  } catch (error) { state = previous; $('wb-materials').value = state.materials; renderMessages(); renderPreview(); note('清空未完成：' + error.message, true); }
+    await saveWorkspace(); $('wb-message').value = ''; savedWorld = null; storyCharacterIds = null; renderMessages(); renderPreview(); note('工作台已清空。');
+  } catch (error) { state = previous; storyCharacterIds = previousSelection; $('wb-materials').value = state.materials; renderMessages(); renderPreview(); note('清空未完成：' + error.message, true); }
   finally { setBusy(false); }
 }
 async function boot() {
@@ -261,6 +359,7 @@ async function boot() {
   $('wb-notes').onclick = () => download('设定讨论记录.md', notesMarkdown(), 'text/markdown');
   $('wb-materials').oninput = scheduleSave;
   $('wb-preview').addEventListener('input', event => {
+    if (event.target.closest('#wb-story-casting')) return;
     if (event.target.id === 'wb-json') { jsonDirty = true; return; }
     collectPreview(); savedWorld = null; scheduleSave();
   });

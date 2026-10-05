@@ -5,6 +5,7 @@ let draft = null;
 let savedWorldId = null;
 let refreshTimer = null;
 let editingWorld = null;
+const worldSelections = new Map();
 const api = async (path, body) => {
   const response = await fetch(path, body === undefined ? undefined : {
     method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
@@ -19,6 +20,36 @@ function say(message, error = false) { const n = $('notice'); n.hidden = !messag
 function readStory(id) { location.href = './read.html?story=' + encodeURIComponent(id); }
 function showCreate(show = true) { $('create-panel').hidden = !show; if (show) $('create-panel').scrollIntoView({behavior:'smooth'}); }
 function showImport(show = true) { $('import-panel').hidden = !show; if (show) $('import-panel').scrollIntoView({behavior:'smooth'}); }
+function selectedCharacters(parentId) {
+  return [...$(parentId).querySelectorAll('input[data-character-id]')].filter(input => input.checked).map(input => input.dataset.characterId);
+}
+function renderCasting(parentId, options, defaults, previous, changed) {
+  const parent = $(parentId), selected = new Set(previous === undefined ? defaults : previous);
+  const group = node('fieldset', 'casting-picker');
+  group.append(node('legend', null, '本次可登场人物'));
+  group.append(node('p', 'small', '至少选一位；选中的人物会按剧情需要登场，不会每轮全部行动。'));
+  const choices = node('div', 'casting-options');
+  for (const person of options) {
+    const label = node('label', 'casting-option'), input = node('input');
+    input.type = 'checkbox'; input.dataset.characterId = person.id; input.checked = selected.has(person.id);
+    input.addEventListener('change', () => changed(selectedCharacters(parentId)));
+    label.append(input, node('span', null, person.name)); choices.append(label);
+  }
+  const all = node('button', 'quiet casting-all', '全选'); all.type = 'button';
+  all.onclick = () => { choices.querySelectorAll('input').forEach(input => { input.checked = true; }); changed(selectedCharacters(parentId)); };
+  group.append(choices, all); parent.replaceChildren(group);
+}
+function renderWorldCasting() {
+  const world = worlds.find(item => item.id === $('world-select').value);
+  if (!world) { $('story-casting').replaceChildren(); return; }
+  const options = world.character_options || [], defaults = world.default_character_ids || options.map(item => item.id);
+  renderCasting('story-casting', options, defaults, worldSelections.get(world.id), ids => worldSelections.set(world.id, ids));
+}
+function requireCharacters(parentId) {
+  const ids = selectedCharacters(parentId);
+  if (!ids.length) throw new Error('请至少选择一位本次可登场人物。');
+  return ids;
+}
 function card(item) {
   const box = node('article', 'story-card');
   const left = node('div');
@@ -48,15 +79,18 @@ async function loadStories() {
   if (active.some(s => s.in_progress)) refreshTimer = setTimeout(() => loadStories().catch(e => say(e.message,true)), 1500);
 }
 async function loadWorlds() {
+  const previous = $('world-select').value;
   worlds = (await api('/api/library/worlds')).worlds;
   const select = $('world-select'); select.replaceChildren();
   worlds.forEach(w => { const option = node('option',null,w.title + (w.kind === 'preset' ? ' · 内置预设' : ' · 已导入')); option.value=w.id; select.append(option); });
+  if (worlds.some(world => world.id === previous)) select.value = previous;
   if (!$('story-title').value && worlds.length) $('story-title').value = worlds[0].title + ' · 新故事';
   $('edit-world').hidden = select.value === 'browser-sample';
+  renderWorldCasting();
 }
-async function create(worldId, title, button) {
+async function create(worldId, title, button, parentId='story-casting') {
   button.disabled = true;
-  try { const result = await api('/api/library/story',{world_id:worldId,title:title}); readStory(result.id); }
+  try { const result = await api('/api/library/story',{world_id:worldId,title:title,character_ids:requireCharacters(parentId)}); readStory(result.id); }
   catch(e) { say('创建失败：'+e.message,true); button.disabled=false; }
 }
 function evidenceBlock(title, value) { const e=node('article'); e.append(node('strong',null,title)); e.append(node('div',null,Array.isArray(value)&&value.length?value.join('\n'):'暂无记录')); return e; }
@@ -72,6 +106,7 @@ function renderPreview(result) {
   $('import-story-title').value=(s.title||'导入世界')+' · 新故事';
   const fields=(id,items,title)=>{const parent=$(id); parent.replaceChildren(node('h3',null,title)); items.forEach(item=>{const label=node('label',null,item.name+'（'+item.id+'）的描述'); const text=node('textarea'); text.rows=2; text.value=item.description||''; text.dataset.itemId=item.id; label.append(text); parent.append(label);});};
   fields('preview-people',s.characters,'人物'); fields('preview-places',s.locations,'地点');
+  renderCasting('import-casting', s.characters, s.world?.casting?.default_character_ids || s.characters.map(person => person.id), undefined, () => {});
   $('preview').scrollIntoView({behavior:'smooth'});
 }
 function renderEditFields(parentId, items, title) {
@@ -95,7 +130,7 @@ async function saveWorldEdit() {
   const edits={title:$('edit-title').value,summary:$('edit-summary').value,world_description:$('edit-description').value,characters:{},locations:{}};
   for(const [key,id] of [['characters','edit-people'],['locations','edit-places']]) $(id).querySelectorAll('textarea').forEach(t=>edits[key][t.dataset.itemId]=t.value);
   try {await api('/api/library/update-world',{world_id:editingWorld.id,expected_version:editingWorld.scenario.version,edits:edits});
-    await loadWorlds();$('world-select').value=editingWorld.id;$('edit-world').hidden=false;
+    await loadWorlds();$('world-select').value=editingWorld.id;$('edit-world').hidden=false;renderWorldCasting();
     $('world-edit-panel').hidden=true;editingWorld=null;say('世界新版本已保存；已有故事的设定和正文保持原样。');
   } catch(e) {say('修改失败：'+e.message,true);} finally {button.disabled=false;}
 }
@@ -113,13 +148,14 @@ async function saveImport() {
   if(!draft) return;
   const button=$('save-import'); button.disabled=true;
   try {
+    requireCharacters('import-casting');
     if (!savedWorldId) {
       const edits={title:$('preview-title').value,summary:$('preview-summary').value,world_description:$('preview-description').value,characters:{},locations:{}};
       for(const [key,id] of [['characters','preview-people'],['locations','preview-places']]) $(id).querySelectorAll('textarea').forEach(t=>edits[key][t.dataset.itemId]=t.value);
       const saved=await api('/api/library/save-world',{draft_id:draft.draft_id,edits:edits}); savedWorldId=saved.world_id;
       await loadWorlds();
     }
-    await create(savedWorldId,$('import-story-title').value,button);
+    await create(savedWorldId,$('import-story-title').value,button,'import-casting');
   } catch(e) {say('保存失败：'+e.message,true);button.disabled=false;}
 }
 async function boot() {
@@ -129,7 +165,7 @@ async function boot() {
   $('analyze').onclick=analyze; $('save-import').onclick=saveImport;
   $('import-file').onchange=()=>{draft=null;savedWorldId=null;$('preview').hidden=true;$('import-status').textContent='文件已选择，点击“分析资料”后再预览。';};
   $('refresh-stories').onclick=()=>loadStories().catch(e=>say(e.message,true));
-  $('world-select').onchange=()=>{$('edit-world').hidden=$('world-select').value==='browser-sample';};
+  $('world-select').onchange=()=>{$('edit-world').hidden=$('world-select').value==='browser-sample';renderWorldCasting();};
   $('edit-world').onclick=openWorldEdit;$('close-world-edit').onclick=()=>{$('world-edit-panel').hidden=true;};
   $('save-world-edit').onclick=saveWorldEdit;
   try {const health=await api('/api/health'); $('mode').textContent=health.provider.mode==='fake'?'模拟模式':'DeepSeek 真实模式';await loadWorlds();await loadStories();}

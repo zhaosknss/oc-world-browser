@@ -20,6 +20,7 @@
         <div class="choice"><h3>选现有世界</h3><p>同一个世界可以开启多份独立故事，每份都从初始状态开始。</p>
           <label>世界<select id="world-select"></select></label>
           <button id="edit-world" class="quiet" type="button" hidden>编辑这个世界</button>
+          <div id="story-casting"></div>
           <label>故事名称<input id="story-title" maxlength="80" placeholder="给这次故事取个名字"></label>
           <button id="create-story" class="primary">创建并进入阅读</button>
         </div>
@@ -48,6 +49,7 @@
         <div class="form-grid"><label>世界名称<input id="preview-title"></label><label>简介<input id="preview-summary"></label></div>
         <label>世界设定<textarea id="preview-description" rows="4"></textarea></label>
         <div id="preview-people"></div><div id="preview-places"></div>
+        <div id="import-casting"></div>
         <label>这份故事名称<input id="import-story-title" maxlength="80"></label>
         <div class="button-row"><button id="save-import" class="primary">确认世界并创建故事</button><span class="small">保存后世界可重复使用；此故事保留独立快照。</span></div>
       </div>
