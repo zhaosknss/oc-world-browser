@@ -178,7 +178,10 @@ function modeNote(data) {
   if (data.mode === 'deepseek') {
     const sampling = info.sampling || {};
     const thinking = sampling.thinking === 'disabled' ? '思考关闭' : '思考开启';
-    const effort = sampling.reasoning_effort ? ('，强度 ' + sampling.reasoning_effort) : '';
+    const roles = sampling.chapter_role_reasoning_effort;
+    const effort = roles && sampling.thinking !== 'disabled'
+      ? ('，人物与写作 ' + roles.actor_perform + '，导演与结算 ' + roles.director_review)
+      : (sampling.reasoning_effort ? ('，强度 ' + sampling.reasoning_effort) : '');
     return '真实模式：正文与角色决策都调用 DeepSeek 官方 API（' + (info.model || '模型未知')
       + '），按实际用量计费；' + thinking + effort + '；单次调用只发一次请求，不自动重发。';
   }
@@ -957,6 +960,7 @@ function toggleUsage() {
         bits.push('缓存命中 ' + call.tokens.prompt_cache_hit_tokens + ' / 未命中 ' + call.tokens.prompt_cache_miss_tokens);
       }
       if (call.tokens && call.tokens.reasoning !== undefined) bits.push('推理 token ' + call.tokens.reasoning);
+      if (call.reasoning_effort) bits.push('思考 ' + call.reasoning_effort);
       if (call.ok === false) bits.push('失败类型 ' + (call.error_type || '未提供'));
       lines.push(name + '：' + bits.join(' · '));
     });

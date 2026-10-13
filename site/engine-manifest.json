@@ -2,12 +2,17 @@
   "format": "oc-world-engine",
   "version": 1,
   "pyodide": "0.27.7",
-  "sha256": "cd2ff215d1e9d31ef0569361c93721e0362fce0675d6bb5b5a1a9abb82cd876b",
+  "sha256": "cad21a2cff5e72cd698819f23b623c5a487eb543e4fae21fe64448443179b471",
   "files": [
     {
       "path": "src/__init__.py",
       "sha256": "76bdfa65ffef85af7573ddf60fd4809ab223bb9171acb55b24e0d361b6adee94",
       "bytes": 37
+    },
+    {
+      "path": "src/actor_protocol.py",
+      "sha256": "6ad5579da9c75b95de5db7410ed8e3aa33788144c6cd29459c51ada49d509021",
+      "bytes": 4590
     },
     {
       "path": "src/browser_lease.py",
@@ -21,13 +26,13 @@
     },
     {
       "path": "src/browser_runtime.py",
-      "sha256": "119017acbbe377f2d220da5d2c12d83822a39dfb3b5b93c6873f33256d9acacf",
-      "bytes": 20352
+      "sha256": "1214d8cb462dbb81030297de482829ce7c828c524ebb238377ed49d02817b0ab",
+      "bytes": 20484
     },
     {
       "path": "src/chapter_protocol.py",
-      "sha256": "030666d1e63a75427a4fdff93b10fe22cefa0d8a4bce11780a2dc9ed8267d21b",
-      "bytes": 19337
+      "sha256": "9f0dda2579740c7ea0f84ef3ccdeb07daa55210276db804e9330f8830e53622b",
+      "bytes": 24409
     },
     {
       "path": "src/chapter_store.py",
@@ -41,8 +46,8 @@
     },
     {
       "path": "src/chapters.py",
-      "sha256": "0f3f7e402f812532ea3463d0392bf0458ff6b692bd66b2f3503d5b590f6e0f82",
-      "bytes": 40620
+      "sha256": "a3a145c81bb84b5fcd234c7f60af2d0684e5e48e4bd6a1831ee8e197d3eb30e1",
+      "bytes": 43153
     },
     {
       "path": "src/context.py",
@@ -56,13 +61,18 @@
     },
     {
       "path": "src/deepseek.py",
-      "sha256": "cf6b894c5a61c6d810748c4553a106f6bf2463ae9a3498f9701a7bc9aa6a788f",
-      "bytes": 71816
+      "sha256": "53f8aae571b14f115c1a2fa6d3aa1314558e0048e9569d7fa14e75533340e7ff",
+      "bytes": 73905
     },
     {
       "path": "src/demo.py",
       "sha256": "1d980c8314c376fe26c6e986aff7eac4854fad0d93ac50e2370812c535b776ea",
       "bytes": 37648
+    },
+    {
+      "path": "src/director_context.py",
+      "sha256": "8a4ba4f6676856018b19b2aa9d84b84a852e5e53fce499c99e00d244d933ecd2",
+      "bytes": 2825
     },
     {
       "path": "src/engine.py",
@@ -101,8 +111,8 @@
     },
     {
       "path": "src/prompt_layout.py",
-      "sha256": "934e01e17297aaa11bd7bc11fc8da4e1050e3455cded298997366d994ca5fa9f",
-      "bytes": 4001
+      "sha256": "d091e763a428b281fabc85a82cf1c7db1d5c4595059fc7d0f6d44dbe5c9ff1c8",
+      "bytes": 4734
     },
     {
       "path": "src/provider.py",
@@ -113,6 +123,11 @@
       "path": "src/scenario.py",
       "sha256": "12005ced232928e0f0b30c52f63126bd734277980ba53924a85fb1dcfee9287e",
       "bytes": 20131
+    },
+    {
+      "path": "src/scene_facts.py",
+      "sha256": "a4d23d33f22e888789bfe2b12becd9a28ac95b2882eeae60cb2663f362ea40e6",
+      "bytes": 1996
     },
     {
       "path": "src/setting_workbench.py",
