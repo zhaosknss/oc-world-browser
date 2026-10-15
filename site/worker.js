@@ -7,6 +7,7 @@ let requestNumber = 0;
 let requestId = null;
 let checkpointNumber = 0;
 let handling = false;
+let checkpointAcksEnabled = false;
 const pendingCheckpoints = new Map();
 let checkpointFailure = null;
 
@@ -60,14 +61,20 @@ function restoreFiles(snapshot) {
 self.ocBrowserCheckpoint = () => {
   if (!python) return;
   if (checkpointFailure) throw checkpointFailure;
-  const sequence = ++checkpointNumber;
-  let acknowledge;
-  const confirmed = new Promise(resolve => { acknowledge = resolve; });
-  pendingCheckpoints.set(sequence, {requestId, confirmed, acknowledge});
-  self.postMessage({type: "checkpoint", requestId, sequence, snapshot: snapshotFiles()});
+  const checkpoint = {type: "checkpoint", requestId, snapshot: snapshotFiles()};
+  // Cached older main scripts do not send ACKs. Only opt in when initialization
+  // explicitly advertises support, so a mixed cached version cannot hang.
+  if (checkpointAcksEnabled) {
+    checkpoint.sequence = ++checkpointNumber;
+    let acknowledge;
+    const confirmed = new Promise(resolve => { acknowledge = resolve; });
+    pendingCheckpoints.set(checkpoint.sequence, {requestId, confirmed, acknowledge});
+  }
+  self.postMessage(checkpoint);
 };
 
 async function waitForCheckpoints(id) {
+  if (!checkpointAcksEnabled) return;
   if (checkpointFailure) throw checkpointFailure;
   const confirmations = [...pendingCheckpoints.values()]
     .filter(checkpoint => checkpoint.requestId === id).map(checkpoint => checkpoint.confirmed);
@@ -76,6 +83,7 @@ async function waitForCheckpoints(id) {
 }
 
 function acknowledgeCheckpoint(message) {
+  if (!checkpointAcksEnabled) return;
   const checkpoint = pendingCheckpoints.get(message.sequence);
   if (!checkpoint || checkpoint.requestId !== message.requestId) return;
   if (message.ok !== true) {
@@ -122,6 +130,7 @@ async function digest(bytes) {
 
 async function initialize(message) {
   if (initialized) throw new Error("故事引擎已初始化");
+  checkpointAcksEnabled = message.checkpointAcks === true;
   progress("runtime", "首次打开需要下载浏览器运行环境，请稍候…");
   const runtimeUrl = String(message.runtimeUrl);
   // Versioned runtime, not an arbitrary script supplied by archive data.

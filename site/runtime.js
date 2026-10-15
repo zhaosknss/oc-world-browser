@@ -375,7 +375,8 @@ export class BrowserClient extends EventTarget {
       const snapshot = await this.store.read();
       this._ensureOpen();
       this._channel = this._spawn(false);
-      await this._send(this._channel, "initialize", {snapshot, engineUrl: this.engineUrl, manifestUrl: this.manifestUrl, runtimeUrl: this.runtimeUrl});
+      await this._send(this._channel, "initialize", {snapshot, checkpointAcks: true,
+        engineUrl: this.engineUrl, manifestUrl: this.manifestUrl, runtimeUrl: this.runtimeUrl});
       this._ensureOpen();
       if (!this._channel.snapshot) throw new BrowserRuntimeError("引擎未返回可保存状态", "worker_error");
       await this._queueSnapshot(this._channel.snapshot);
@@ -436,7 +437,8 @@ export class BrowserClient extends EventTarget {
       const snapshot = await decodeArchive(file);
       this._ensureOpen();
       candidate = this._spawn(false);
-      await this._send(candidate, "initialize", {snapshot, engineUrl: this.engineUrl, manifestUrl: this.manifestUrl, runtimeUrl: this.runtimeUrl});
+      await this._send(candidate, "initialize", {snapshot, checkpointAcks: true,
+        engineUrl: this.engineUrl, manifestUrl: this.manifestUrl, runtimeUrl: this.runtimeUrl});
       this._ensureOpen();
       if (Object.keys(this._settings).length) {
         const result = await this._send(candidate, "dispatch", {method: "POST", path: "/api/settings", body: this._settings});
