@@ -65,7 +65,7 @@ function createTools() {
     $('local-prepare-chapters').value = String(settings.prepare_chapters);
     $('local-base-url').value = settings.base_url;
     $('local-storage-status').textContent = client?.storageError
-      ? '本地保存遇到问题，请保持页面打开并导出备份。'
+      ? '本地保存失败，生成已停止。请保持页面打开并导出备份；已经发出的 API 请求可能仍计费。'
       : '存档自动保存在当前浏览器。生成时请保持页面运行。';
   }
   button.addEventListener('click', () => { populate(); note(''); dialog.showModal(); });
@@ -77,7 +77,10 @@ function createTools() {
   archiveLink.id = 'local-download-ready';
   archiveLink.hidden = true;
   $('local-tools-note').after(archiveLink);
-  function setControls(disabled) { controls.forEach(id => $(id).disabled = disabled); }
+  function setControls(disabled) {
+    controls.forEach(id => { $(id).disabled = disabled || !!client?.storageError; });
+    if (client?.canExportRecovery) $('local-export').disabled = false;
+  }
   window.addEventListener('oc-world-busy', () => setControls(isBusy));
   $('local-settings-form').addEventListener('submit', async event => {
     event.preventDefault();
@@ -104,7 +107,7 @@ function createTools() {
     } catch (error) { note(error.message, true); }
   });
   $('local-export').addEventListener('click', async () => {
-    if (isBusy) return;
+    if (isBusy && !client?.canExportRecovery) return;
     setControls(true);
     try {
       const blob = await client.exportArchive();
@@ -199,6 +202,15 @@ export async function boot() {
     const retry = element('button', '', '重新打开');
     retry.addEventListener('click', () => location.reload());
     card.append(element('p', '', '请使用允许保存网站数据的现代浏览器，并关闭其他正在使用这个故事库的标签页。'), retry);
+    if (client?.canExportRecovery) {
+      const backup = element('button', '', '导出未保存的完整存档');
+      backup.addEventListener('click', () => {
+        overlay.remove();
+        document.getElementById('local-tools').click();
+        document.getElementById('local-export').click();
+      });
+      card.append(backup);
+    }
     throw error;
   }
 }

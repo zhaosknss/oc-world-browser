@@ -7,6 +7,8 @@ let requestNumber = 0;
 let requestId = null;
 let checkpointNumber = 0;
 let handling = false;
+const pendingCheckpoints = new Map();
+let checkpointFailure = null;
 
 function progress(phase, message) { self.postMessage({type: "progress", phase, message, requests: requestNumber}); }
 
@@ -57,12 +59,40 @@ function restoreFiles(snapshot) {
 // in the main thread; dispatch completion waits for that confirmation before reporting success.
 self.ocBrowserCheckpoint = () => {
   if (!python) return;
-  self.postMessage({type: "checkpoint", requestId, sequence: ++checkpointNumber, snapshot: snapshotFiles()});
+  if (checkpointFailure) throw checkpointFailure;
+  const sequence = ++checkpointNumber;
+  let acknowledge;
+  const confirmed = new Promise(resolve => { acknowledge = resolve; });
+  pendingCheckpoints.set(sequence, {requestId, confirmed, acknowledge});
+  self.postMessage({type: "checkpoint", requestId, sequence, snapshot: snapshotFiles()});
 };
+
+async function waitForCheckpoints(id) {
+  if (checkpointFailure) throw checkpointFailure;
+  const confirmations = [...pendingCheckpoints.values()]
+    .filter(checkpoint => checkpoint.requestId === id).map(checkpoint => checkpoint.confirmed);
+  await Promise.all(confirmations);
+  if (checkpointFailure) throw checkpointFailure;
+}
+
+function acknowledgeCheckpoint(message) {
+  const checkpoint = pendingCheckpoints.get(message.sequence);
+  if (!checkpoint || checkpoint.requestId !== message.requestId) return;
+  if (message.ok !== true) {
+    checkpointFailure = new Error("本地存档保存失败，生成已停止。请导出备份后重新打开页面。");
+    checkpointFailure.code = "storage_failed";
+    for (const pending of pendingCheckpoints.values()) pending.acknowledge();
+    pendingCheckpoints.clear();
+    return;
+  }
+  pendingCheckpoints.delete(message.sequence);
+  checkpoint.acknowledge();
+}
 
 // Python's provider is synchronous. Synchronous XHR is allowed in this dedicated worker,
 // keeping the existing engine independent of browser UI while avoiding a hosted proxy.
 self.ocBrowserRequest = (url, bodyText, headersJson, timeoutMs) => {
+  if (checkpointFailure) throw checkpointFailure;
   const target = new URL(String(url));
   if (target.protocol !== "https:" || target.username || target.password) {
     throw new Error("浏览器 API 地址需要使用 HTTPS");
@@ -146,19 +176,26 @@ json.dumps(oc_runtime.dispatch(oc_request['method'], oc_request['path'], oc_requ
 
 self.onmessage = async event => {
   const message = event.data || {};
+  // ACKs must be handled while the original operation is waiting for storage.
+  if (message.type === "checkpoint_ack") { acknowledgeCheckpoint(message); return; }
   if (handling) { self.postMessage({id: message.id, ok: false, code: "library_busy", error: "故事引擎正在处理另一个操作"}); return; }
   handling = true;
   requestId = message.id;
   try {
+    if (checkpointFailure) throw checkpointFailure;
     let value;
     if (message.type === "initialize") value = await initialize(message);
     else if (message.type === "dispatch") value = await dispatch(message);
     else throw new Error("未知的引擎操作");
+    await waitForCheckpoints(message.id);
     self.postMessage({id: message.id, ok: true, value});
   } catch (error) {
+    try { await waitForCheckpoints(message.id); }
+    catch (storageError) { error = storageError; }
     // Detailed Python/provider errors are sanitized inside BrowserRuntime. Unexpected errors
     // use a fixed public message instead of a traceback that could contain request details.
     const known = error instanceof Error && !error.name?.includes("Python");
-    self.postMessage({id: message.id, ok: false, code: "worker_error", error: known ? error.message : "故事引擎操作未完成，已保存节点保持不变"});
+    self.postMessage({id: message.id, ok: false, code: error?.code === "storage_failed" ? "storage_failed" : "worker_error",
+      error: known ? error.message : "故事引擎操作未完成，已保存节点保持不变"});
   } finally { handling = false; requestId = null; }
 };

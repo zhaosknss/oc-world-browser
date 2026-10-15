@@ -199,6 +199,7 @@ export class BrowserClient extends EventTarget {
     this.busy = false;
     this.disposed = false;
     this.storageError = null;
+    this._recoverySnapshot = null;
     this.savedAt = null;
     this._channel = null;
     this._channels = new Set();
@@ -238,6 +239,33 @@ export class BrowserClient extends EventTarget {
     for (const pending of channel.pending.values()) pending.reject(error);
     channel.pending.clear();
     this._channels.delete(channel);
+  }
+  get canExportRecovery() { return !!(this.storageError && this._recoverySnapshot); }
+  _ackCheckpoint(channel, message, ok, persisted = false) {
+    if (channel.failed || !Number.isSafeInteger(message?.sequence) || message.sequence <= 0) return;
+    channel.worker.postMessage({type: "checkpoint_ack", requestId: message.requestId,
+      sequence: message.sequence, ok, persisted, code: ok ? undefined : this.storageError?.code || "storage_failed"});
+  }
+  _failStorage(channel, error) {
+    if (!this.storageError) {
+      this.storageError = error instanceof BrowserRuntimeError ? error : new BrowserRuntimeError(
+        "本地存档保存失败，生成已停止。请导出备份后重新打开页面。", "storage_failed");
+      // Keep the latest validated snapshot before terminating the worker. It may
+      // contain more progress than the last successful IndexedDB transaction.
+      this._recoverySnapshot = this._channel?.snapshot || channel?.snapshot || null;
+      if (channel) this._stopChannel(channel, this.storageError);
+      if (this._channel && this._channel !== channel) this._stopChannel(this._channel, this.storageError);
+      this.ready = false;
+      this._settings = {};
+      this._emit("checkpoint", {saved: false, error: this.storageError.message, stopped: true,
+        recoverable: this.canExportRecovery});
+      this._emit("error", this.storageError);
+      this._setBusy(false);
+      // Termination stops local work immediately. Already-started remote
+      // requests may still be processed or billed by the API service.
+      if (!this.disposed) void this._releaseAfterSaves(true);
+    }
+    return this.storageError;
   }
   _releaseAfterSaves(closeStore = false) {
     const releaseLock = this._releaseLock;
@@ -284,7 +312,7 @@ export class BrowserClient extends EventTarget {
     };
     return channel;
   }
-  _queueSnapshot(snapshot) {
+  _queueSnapshot(snapshot, channel = this._channel) {
     this._ensureOpen();
     validateSnapshot(snapshot);
     this._saveQueue = this._saveQueue.then(async () => {
@@ -293,9 +321,7 @@ export class BrowserClient extends EventTarget {
       this.savedAt = new Date().toISOString();
       this._emit("checkpoint", {saved: true, savedAt: this.savedAt, files: snapshot.files.length});
     }).catch(error => {
-      this.storageError = error instanceof BrowserRuntimeError ? error : new BrowserRuntimeError("本地存档保存失败，请导出备份后重开页面", "storage_failed");
-      this._emit("checkpoint", {saved: false, error: this.storageError.message});
-      this._emit("error", this.storageError);
+      this._failStorage(channel, error);
     });
     return this._saveQueue;
   }
@@ -305,8 +331,15 @@ export class BrowserClient extends EventTarget {
     if (message.type === "checkpoint") {
       try {
         channel.snapshot = validateSnapshot(message.snapshot);
-        if (channel.persist) this._queueSnapshot(channel.snapshot);
-      } catch (error) { this.storageError = error; this._emit("error", error); }
+        if (channel.persist) {
+          await this._queueSnapshot(channel.snapshot, channel);
+          if (!this.storageError) this._ackCheckpoint(channel, message, true, true);
+        } else this._ackCheckpoint(channel, message, true, false);
+      } catch (error) {
+        this._ackCheckpoint(channel, message, false);
+        if (channel === this._channel || channel.persist) this._failStorage(channel, error);
+        else this._stopChannel(channel, error);
+      }
       return;
     }
     const pending = channel.pending.get(message.id);
@@ -332,6 +365,7 @@ export class BrowserClient extends EventTarget {
   }
   async initialize() {
     if (this.ready) return this;
+    if (this.storageError) throw this.storageError;
     if (this.busy || this.disposed) throw new BrowserRuntimeError("故事引擎正在启动或页面已关闭", "library_busy");
     this._setBusy(true);
     try {
@@ -361,9 +395,9 @@ export class BrowserClient extends EventTarget {
     } finally { this._setBusy(false); }
   }
   async request(method, path, body = undefined) {
+    if (this.storageError) throw this.storageError;
     if (!this.ready || this.disposed) throw new BrowserRuntimeError("故事引擎尚未就绪", "not_ready");
     if (this.busy) throw new BrowserRuntimeError("当前操作正在进行，请等完成后再操作", "library_busy");
-    if (this.storageError) throw this.storageError;
     this._setBusy(true);
     try {
       const result = await this._send(this._channel, "dispatch", {method, path, body});
@@ -381,6 +415,11 @@ export class BrowserClient extends EventTarget {
   }
   getSettings() { return this.request("GET", "/api/settings"); }
   async exportArchive() {
+    // A failed save must be recoverable from the same busy/error callback,
+    // before the rejected generation promise has unwound its UI state.
+    if (this.canExportRecovery) {
+      return new Blob([await encodeArchive(this._recoverySnapshot)], {type: "application/json"});
+    }
     if ((!this.ready && !this._channel?.snapshot) || this.busy) throw new BrowserRuntimeError("请等当前操作完成后再导出存档", "library_busy");
     await this._saveQueue;
     // Export the in-memory snapshot even if the disk is full, so recovery remains possible.
@@ -407,7 +446,7 @@ export class BrowserClient extends EventTarget {
       this._ensureOpen();
       const importingWrite = this._saveQueue.then(() => this.store.write(candidate.snapshot));
       // Include the atomic import transaction in the lifetime lock's drain barrier.
-      this._saveQueue = importingWrite.catch(() => {});
+      this._saveQueue = importingWrite.catch(error => { this._failStorage(this._channel, error); });
       await importingWrite;
       this._ensureOpen();
       this._stopChannel(this._channel);

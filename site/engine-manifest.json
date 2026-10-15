@@ -2,7 +2,7 @@
   "format": "oc-world-engine",
   "version": 1,
   "pyodide": "0.27.7",
-  "sha256": "cad21a2cff5e72cd698819f23b623c5a487eb543e4fae21fe64448443179b471",
+  "sha256": "ffc915a20be2b8a684a174fa954e9dd64dd4bedf96972eef245e35de1e42f98b",
   "files": [
     {
       "path": "src/__init__.py",
@@ -31,8 +31,8 @@
     },
     {
       "path": "src/chapter_protocol.py",
-      "sha256": "9f0dda2579740c7ea0f84ef3ccdeb07daa55210276db804e9330f8830e53622b",
-      "bytes": 24409
+      "sha256": "34d05cf6cfd65052a7ea5b77a0e9551967138accee7e6bfb6ee5b91e15d82b43",
+      "bytes": 24140
     },
     {
       "path": "src/chapter_store.py",
@@ -46,8 +46,8 @@
     },
     {
       "path": "src/chapters.py",
-      "sha256": "a3a145c81bb84b5fcd234c7f60af2d0684e5e48e4bd6a1831ee8e197d3eb30e1",
-      "bytes": 43153
+      "sha256": "1b2c08792c2425fd7919ad2aaea378c31acbd3d6edb315917a93fcf6af23a66d",
+      "bytes": 44032
     },
     {
       "path": "src/context.py",
@@ -136,8 +136,8 @@
     },
     {
       "path": "src/settlement.py",
-      "sha256": "77e602d511de0ed61e81f9191004393a18cc4c6985a445a4801ca870c3d4c0f2",
-      "bytes": 19812
+      "sha256": "81482d8a3e1d9725332f2056dca54d7f62ef39403b407ce647388d4a3f19106a",
+      "bytes": 20526
     },
     {
       "path": "src/story.py",
