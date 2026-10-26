@@ -29,7 +29,11 @@ function snapshotFiles() {
       const archivePath = relative ? `${relative}/${name}` : name;
       const info = python.FS.lstat(path);
       if (python.FS.isLink(info.mode)) throw new Error("存档不支持符号链接");
-      if (python.FS.isDir(info.mode)) walk(path, archivePath);
+      // Recovery uses chapter_work in world.db. Temporary simulation copies are
+      // discarded on restart and do not belong in device saves or backups.
+      if (python.FS.isDir(info.mode)) {
+        if (name !== ".chapter-work") walk(path, archivePath);
+      }
       else if (python.FS.isFile(info.mode)) files.push({path: checkedPath(archivePath), bytes: python.FS.readFile(path)});
     }
   }
@@ -170,16 +174,21 @@ async function dispatch(message) {
     throw new Error("无效的引擎请求");
   }
   python.globals.set("oc_request_json", JSON.stringify({method: message.method, path: message.path, body: message.body ?? null}));
+  let changed = true;
   try {
     const response = await python.runPythonAsync(`
 oc_request = json.loads(oc_request_json)
-json.dumps(oc_runtime.dispatch(oc_request['method'], oc_request['path'], oc_request['body']), ensure_ascii=False)
+oc_result = oc_runtime.dispatch(oc_request['method'], oc_request['path'], oc_request['body'])
+json.dumps({'result': oc_result, 'changed': getattr(oc_runtime, 'storage_changed', True)}, ensure_ascii=False)
 `);
-    return JSON.parse(response);
+    const envelope = JSON.parse(response);
+    // The Python wrapper also marks older engines without this flag as changed.
+    changed = envelope.changed;
+    return envelope.result;
   } finally {
     python.globals.delete("oc_request_json");
-    python.runPython("oc_request = None");
-    self.ocBrowserCheckpoint();
+    python.runPython("oc_request = None; oc_result = None");
+    if (changed) self.ocBrowserCheckpoint();
   }
 }
 
